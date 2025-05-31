@@ -159,6 +159,66 @@ namespace Data.Implementations
             return true;
         }
 
+        public async Task<bool> DeleteWithAuditAsync(int id, EliminacionLogicaDto eliminacionDto)
+        {
+            var categoria = await _context.Categorias
+                .Include(c => c.Productos.Where(p => p.Estado))
+                .FirstOrDefaultAsync(c => c.Id == id && c.Estado);
+
+            if (categoria == null)
+                return false;
+
+            // Verificar si tiene productos activos
+            bool tieneProductosActivos = categoria.Productos.Any();
+            if (tieneProductosActivos)
+                return false; // No se puede eliminar si tiene productos activos
+
+            categoria.Estado = false;
+            categoria.FechaModificacion = DateTime.Now;
+            categoria.FechaEliminacion = DateTime.Now;
+            categoria.UsuarioEliminacion = eliminacionDto.UsuarioEliminacion;
+            categoria.MotivoEliminacion = eliminacionDto.MotivoEliminacion;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<CategoriaDto?> UpdatePartialAsync(int id, ActualizarParcialCategoriaDto categoriaDto)
+        {
+            var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.Id == id && c.Estado);
+            if (categoria == null)
+                return null;
+
+            // Actualizar solo los campos que vienen con valores
+            if (!string.IsNullOrEmpty(categoriaDto.Nombre))
+            {
+                categoria.Nombre = categoriaDto.Nombre;
+            }
+
+            if (categoriaDto.Descripcion != null)
+            {
+                categoria.Descripcion = categoriaDto.Descripcion;
+            }
+
+            if (categoriaDto.Estado.HasValue)
+            {
+                categoria.Estado = categoriaDto.Estado.Value;
+            }
+
+            categoria.FechaModificacion = DateTime.Now;
+            await _context.SaveChangesAsync();
+
+            return new CategoriaDto
+            {
+                Id = categoria.Id,
+                Nombre = categoria.Nombre,
+                Descripcion = categoria.Descripcion,
+                Estado = categoria.Estado,
+                FechaCreacion = categoria.FechaCreacion,
+                FechaModificacion = categoria.FechaModificacion
+            };
+        }
+
         public async Task<bool> ExistsAsync(string nombre, int? excludeId = null)
         {
             var query = _context.Categorias.Where(c => c.Nombre.ToLower() == nombre.ToLower() && c.Estado);

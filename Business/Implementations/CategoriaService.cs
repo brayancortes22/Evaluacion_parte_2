@@ -151,5 +151,64 @@ namespace Business.Implementations
                 throw new BusinessException($"Error al eliminar la categoría con ID {id}", ex);
             }
         }
+
+        public async Task<bool> DeleteWithAuditAsync(int id, EliminacionLogicaDto eliminacionDto)
+        {
+            try
+            {
+                if (id <= 0)
+                    throw new BusinessException("El ID de la categoría debe ser mayor que 0");
+
+                if (string.IsNullOrWhiteSpace(eliminacionDto.UsuarioEliminacion))
+                    throw new BusinessException("El usuario que realiza la eliminación es obligatorio");
+
+                var resultado = await _categoriaRepository.DeleteWithAuditAsync(id, eliminacionDto);
+                if (!resultado)
+                    throw new BusinessException("No se puede eliminar la categoría. Puede que no exista o tenga productos asociados");
+
+                return resultado;
+            }
+            catch (BusinessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new BusinessException($"Error al eliminar la categoría con ID {id}", ex);
+            }
+        }
+
+        public async Task<CategoriaDto> UpdatePartialAsync(int id, ActualizarParcialCategoriaDto categoriaDto)
+        {
+            try
+            {
+                if (id <= 0)
+                    throw new BusinessException("El ID de la categoría debe ser mayor que 0");
+
+                // Si se está actualizando el nombre, validar que no sea vacío y que no exista
+                if (!string.IsNullOrEmpty(categoriaDto.Nombre))
+                {
+                    if (string.IsNullOrWhiteSpace(categoriaDto.Nombre))
+                        throw new BusinessException("El nombre de la categoría no puede estar vacío");
+
+                    if (await _categoriaRepository.ExistsAsync(categoriaDto.Nombre, id))
+                        throw new BusinessException($"Ya existe otra categoría con el nombre '{categoriaDto.Nombre}'");
+                }
+
+                var categoriaActualizada = await _categoriaRepository.UpdatePartialAsync(id, categoriaDto);
+                if (categoriaActualizada == null)
+                    throw new BusinessException($"No se encontró la categoría con ID {id}");
+
+                return categoriaActualizada;
+            }
+            catch (BusinessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new BusinessException($"Error al actualizar parcialmente la categoría con ID {id}", ex);
+            }
+        }
     }
 }

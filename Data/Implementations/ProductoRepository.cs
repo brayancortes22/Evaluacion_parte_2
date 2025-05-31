@@ -183,6 +183,24 @@ namespace Data.Implementations
             return true;
         }
 
+        public async Task<bool> DeleteWithAuditAsync(int id, EliminacionLogicaDto eliminacionDto)
+        {
+            var producto = await _context.Productos
+                .FirstOrDefaultAsync(p => p.Id == id && p.Estado);
+
+            if (producto == null)
+                return false;
+
+            producto.Estado = false;
+            producto.FechaModificacion = DateTime.Now;
+            producto.FechaEliminacion = DateTime.Now;
+            producto.UsuarioEliminacion = eliminacionDto.UsuarioEliminacion;
+            producto.MotivoEliminacion = eliminacionDto.MotivoEliminacion;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<bool> ExistsByCodigoAsync(string codigo, int? excludeId = null)
         {
             var query = _context.Productos.Where(p => p.Codigo.ToLower() == codigo.ToLower() && p.Estado);
@@ -218,6 +236,76 @@ namespace Data.Implementations
                 })
                 .OrderBy(p => p.Nombre)
                 .ToListAsync();
+        }
+
+        public async Task<ProductoDto?> UpdatePartialAsync(int id, ActualizarParcialProductoDto productoDto)
+        {
+            var producto = await _context.Productos
+                .Include(p => p.Categoria)
+                .FirstOrDefaultAsync(p => p.Id == id && p.Estado);
+
+            if (producto == null)
+                return null;
+
+            // Verificar si el código ya existe (si se está cambiando)
+            if (!string.IsNullOrEmpty(productoDto.Nombre))
+            {
+                producto.Nombre = productoDto.Nombre;
+            }
+
+            if (productoDto.Descripcion != null)
+            {
+                producto.Descripcion = productoDto.Descripcion;
+            }
+
+            if (productoDto.Precio.HasValue)
+            {
+                producto.Precio = productoDto.Precio.Value;
+            }
+
+            if (productoDto.Stock.HasValue)
+            {
+                producto.Stock = productoDto.Stock.Value;
+            }
+
+            if (productoDto.Estado.HasValue)
+            {
+                producto.Estado = productoDto.Estado.Value;
+            }
+
+            if (productoDto.CategoriaId.HasValue)
+            {
+                // Verificar que la categoría existe y está activa
+                var categoriaExists = await _context.Categorias
+                    .AnyAsync(c => c.Id == productoDto.CategoriaId.Value && c.Estado);
+                
+                if (categoriaExists)
+                {
+                    producto.CategoriaId = productoDto.CategoriaId.Value;
+                    // Recargar la navegación de categoría
+                    await _context.Entry(producto)
+                        .Reference(p => p.Categoria)
+                        .LoadAsync();
+                }
+            }
+
+            producto.FechaModificacion = DateTime.Now;
+            await _context.SaveChangesAsync();
+
+            return new ProductoDto
+            {
+                Id = producto.Id,
+                Nombre = producto.Nombre,
+                Descripcion = producto.Descripcion,
+                Precio = producto.Precio,
+                Stock = producto.Stock,
+                Codigo = producto.Codigo,
+                Estado = producto.Estado,
+                FechaCreacion = producto.FechaCreacion,
+                FechaModificacion = producto.FechaModificacion,
+                CategoriaId = producto.CategoriaId,
+                CategoriaNombre = producto.Categoria.Nombre
+            };
         }
     }
 }

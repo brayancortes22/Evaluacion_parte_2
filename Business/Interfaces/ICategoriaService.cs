@@ -48,5 +48,21 @@ namespace Business.Interfaces
         /// <param name="id">ID de la categoría</param>
         /// <returns>True si se eliminó correctamente</returns>
         Task<bool> DeleteAsync(int id);
+
+        /// <summary>
+        /// Elimina una categoría con campos de auditoría
+        /// </summary>
+        /// <param name="id">ID de la categoría</param>
+        /// <param name="eliminacionDto">Datos de auditoría para la eliminación</param>
+        /// <returns>True si se eliminó correctamente</returns>
+        Task<bool> DeleteWithAuditAsync(int id, EliminacionLogicaDto eliminacionDto);
+
+        /// <summary>
+        /// Actualiza parcialmente una categoría
+        /// </summary>
+        /// <param name="id">ID de la categoría</param>
+        /// <param name="categoriaDto">Campos a actualizar</param>
+        /// <returns>Categoría actualizada</returns>
+        Task<CategoriaDto> UpdatePartialAsync(int id, ActualizarParcialCategoriaDto categoriaDto);
     }
 }

@@ -141,6 +141,73 @@ namespace Business.Implementations
             }
         }
 
+        public async Task<bool> DeleteWithAuditAsync(int id, EliminacionLogicaDto eliminacionDto)
+        {
+            try
+            {
+                if (id <= 0)
+                    throw new BusinessException("El ID del producto debe ser mayor que 0");
+
+                if (string.IsNullOrWhiteSpace(eliminacionDto.UsuarioEliminacion))
+                    throw new BusinessException("El usuario que realiza la eliminación es obligatorio");
+
+                var resultado = await _productoRepository.DeleteWithAuditAsync(id, eliminacionDto);
+                if (!resultado)
+                    throw new BusinessException($"No se encontró el producto con ID {id}");
+
+                return resultado;
+            }
+            catch (BusinessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new BusinessException($"Error al eliminar el producto con ID {id}", ex);
+            }
+        }
+
+        public async Task<ProductoDto> UpdatePartialAsync(int id, ActualizarParcialProductoDto productoDto)
+        {
+            try
+            {
+                if (id <= 0)
+                    throw new BusinessException("El ID del producto debe ser mayor que 0");
+
+                // Validaciones específicas para actualización parcial
+                if (productoDto.Precio.HasValue && productoDto.Precio <= 0)
+                    throw new BusinessException("El precio del producto debe ser mayor que 0");
+
+                if (productoDto.Stock.HasValue && productoDto.Stock < 0)
+                    throw new BusinessException("El stock del producto no puede ser negativo");
+
+                if (!string.IsNullOrEmpty(productoDto.Nombre) && string.IsNullOrWhiteSpace(productoDto.Nombre))
+                    throw new BusinessException("El nombre del producto no puede estar vacío");
+
+                // Verificar si la categoría existe (si se está cambiando)
+                if (productoDto.CategoriaId.HasValue)
+                {
+                    var categoriaExiste = await _categoriaRepository.GetByIdAsync(productoDto.CategoriaId.Value);
+                    if (categoriaExiste == null)
+                        throw new BusinessException($"No existe la categoría con ID {productoDto.CategoriaId.Value}");
+                }
+
+                var productoActualizado = await _productoRepository.UpdatePartialAsync(id, productoDto);
+                if (productoActualizado == null)
+                    throw new BusinessException($"No se encontró el producto con ID {id}");
+
+                return productoActualizado;
+            }
+            catch (BusinessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new BusinessException($"Error al actualizar parcialmente el producto con ID {id}", ex);
+            }
+        }
+
         public async Task<IEnumerable<ProductoDto>> SearchAsync(string searchTerm)
         {
             try

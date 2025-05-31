@@ -21,7 +21,10 @@ namespace Entity.Migrations
                     Descripcion = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     Estado = table.Column<bool>(type: "bit", nullable: false),
                     FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    FechaModificacion = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    FechaModificacion = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    FechaEliminacion = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UsuarioEliminacion = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    MotivoEliminacion = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -42,6 +45,9 @@ namespace Entity.Migrations
                     Estado = table.Column<bool>(type: "bit", nullable: false),
                     FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false),
                     FechaModificacion = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    FechaEliminacion = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UsuarioEliminacion = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    MotivoEliminacion = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     CategoriaId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>

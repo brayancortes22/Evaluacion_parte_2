@@ -189,5 +189,63 @@ namespace Web.Controllers
                 return StatusCode(500, new { mensaje = "Error interno del servidor", detalle = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Elimina un producto con auditoría
+        /// </summary>
+        /// <param name="id">ID del producto</param>
+        /// <param name="eliminacionDto">Datos de auditoría para la eliminación</param>
+        /// <returns>Resultado de la operación</returns>
+        [HttpDelete("{id}/audit")]
+        public async Task<ActionResult> DeleteProductoWithAudit(int id, [FromBody] EliminacionLogicaDto eliminacionDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var resultado = await _productoService.DeleteWithAuditAsync(id, eliminacionDto);
+                return Ok(new { mensaje = "Producto eliminado correctamente con auditoría", eliminado = resultado });
+            }
+            catch (BusinessException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensaje = "Error interno del servidor", detalle = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Actualiza parcialmente un producto
+        /// </summary>
+        /// <param name="id">ID del producto</param>
+        /// <param name="productoDto">Campos a actualizar</param>
+        /// <returns>Producto actualizado</returns>
+        [HttpPatch("{id}")]
+        public async Task<ActionResult<ProductoDto>> UpdatePartialProducto(int id, [FromBody] ActualizarParcialProductoDto productoDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var producto = await _productoService.UpdatePartialAsync(id, productoDto);
+                return Ok(producto);
+            }
+            catch (BusinessException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensaje = "Error interno del servidor", detalle = ex.Message });
+            }
+        }
     }
 }

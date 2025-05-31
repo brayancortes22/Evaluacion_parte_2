@@ -169,5 +169,63 @@ namespace Web.Controllers
                 return StatusCode(500, new { mensaje = "Error interno del servidor", detalle = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Elimina una categoría con auditoría
+        /// </summary>
+        /// <param name="id">ID de la categoría</param>
+        /// <param name="eliminacionDto">Datos de auditoría para la eliminación</param>
+        /// <returns>Resultado de la operación</returns>
+        [HttpDelete("{id}/audit")]
+        public async Task<ActionResult> DeleteCategoriaWithAudit(int id, [FromBody] EliminacionLogicaDto eliminacionDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var resultado = await _categoriaService.DeleteWithAuditAsync(id, eliminacionDto);
+                return Ok(new { mensaje = "Categoría eliminada correctamente con auditoría", eliminada = resultado });
+            }
+            catch (BusinessException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensaje = "Error interno del servidor", detalle = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Actualiza parcialmente una categoría
+        /// </summary>
+        /// <param name="id">ID de la categoría</param>
+        /// <param name="categoriaDto">Campos a actualizar</param>
+        /// <returns>Categoría actualizada</returns>
+        [HttpPatch("{id}")]
+        public async Task<ActionResult<CategoriaDto>> UpdatePartialCategoria(int id, [FromBody] ActualizarParcialCategoriaDto categoriaDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var categoria = await _categoriaService.UpdatePartialAsync(id, categoriaDto);
+                return Ok(categoria);
+            }
+            catch (BusinessException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensaje = "Error interno del servidor", detalle = ex.Message });
+            }
+        }
     }
 }

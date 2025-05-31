@@ -37,8 +37,7 @@ namespace Data.Interfaces
         /// <summary>
         /// Actualiza un producto existente
         /// </summary>
-        /// <param name="id">ID del producto</param>
-        /// <param name="productoDto">Datos actualizados</param>
+        /// <param name="id">ID del producto</param>        /// <param name="productoDto">Datos actualizados</param>
         /// <returns>Producto actualizado</returns>
         Task<ProductoDto?> UpdateAsync(int id, ActualizarProductoDto productoDto);
 
@@ -48,6 +47,22 @@ namespace Data.Interfaces
         /// <param name="id">ID del producto</param>
         /// <returns>True si se eliminó correctamente</returns>
         Task<bool> DeleteAsync(int id);
+
+        /// <summary>
+        /// Elimina un producto con campos de auditoría (soft delete mejorado)
+        /// </summary>
+        /// <param name="id">ID del producto</param>
+        /// <param name="eliminacionDto">Datos de auditoría para la eliminación</param>
+        /// <returns>True si se eliminó correctamente</returns>
+        Task<bool> DeleteWithAuditAsync(int id, EliminacionLogicaDto eliminacionDto);
+
+        /// <summary>
+        /// Actualiza parcialmente un producto
+        /// </summary>
+        /// <param name="id">ID del producto</param>
+        /// <param name="productoDto">Campos a actualizar</param>
+        /// <returns>Producto actualizado</returns>
+        Task<ProductoDto?> UpdatePartialAsync(int id, ActualizarParcialProductoDto productoDto);
 
         /// <summary>
         /// Verifica si existe un producto con el código especificado

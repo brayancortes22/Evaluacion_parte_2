@@ -57,12 +57,27 @@ namespace Entity.Model
         /// <summary>
         /// Fecha de creación del producto
         /// </summary>
-        public DateTime FechaCreacion { get; set; } = DateTime.Now;
-
-        /// <summary>
+        public DateTime FechaCreacion { get; set; } = DateTime.Now;        /// <summary>
         /// Fecha de última modificación
         /// </summary>
         public DateTime? FechaModificacion { get; set; }
+
+        /// <summary>
+        /// Fecha de eliminación lógica
+        /// </summary>
+        public DateTime? FechaEliminacion { get; set; }
+
+        /// <summary>
+        /// Usuario que eliminó el registro
+        /// </summary>
+        [StringLength(100)]
+        public string? UsuarioEliminacion { get; set; }
+
+        /// <summary>
+        /// Motivo de la eliminación
+        /// </summary>
+        [StringLength(500)]
+        public string? MotivoEliminacion { get; set; }
 
         /// <summary>
         /// Clave foránea hacia la categoría

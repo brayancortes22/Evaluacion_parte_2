@@ -55,5 +55,21 @@ namespace Business.Interfaces
         /// <param name="searchTerm">Término de búsqueda</param>
         /// <returns>Lista de productos que coinciden</returns>
         Task<IEnumerable<ProductoDto>> SearchAsync(string searchTerm);
+
+        /// <summary>
+        /// Elimina un producto con campos de auditoría
+        /// </summary>
+        /// <param name="id">ID del producto</param>
+        /// <param name="eliminacionDto">Datos de auditoría para la eliminación</param>
+        /// <returns>True si se eliminó correctamente</returns>
+        Task<bool> DeleteWithAuditAsync(int id, EliminacionLogicaDto eliminacionDto);
+
+        /// <summary>
+        /// Actualiza parcialmente un producto
+        /// </summary>
+        /// <param name="id">ID del producto</param>
+        /// <param name="productoDto">Campos a actualizar</param>
+        /// <returns>Producto actualizado</returns>
+        Task<ProductoDto> UpdatePartialAsync(int id, ActualizarParcialProductoDto productoDto);
     }
 }
